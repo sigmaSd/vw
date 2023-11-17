@@ -2,7 +2,26 @@ import { Point } from "../math/point.ts";
 import { Segment } from "../math/segment.ts";
 
 export class Graph {
-  constructor(public points: Point[], public segments: Segment[]) {}
+  constructor(public points: Point[] = [], public segments: Segment[] = []) {}
+  static load(
+    info: {
+      points: { x: number; y: number }[];
+      segments: Segment[];
+    },
+  ) {
+    const points = info.points.map((i) => new Point(i.x, i.y));
+    const segments = info.segments.map((i) =>
+      new Segment(
+        points.find((p) => p.equals(i.p1))!,
+        points.find((p) => p.equals(i.p2))!,
+      )
+    );
+    return new Graph(points, segments);
+  }
+  dispose() {
+    this.points = [];
+    this.segments = [];
+  }
   addPoint(point: Point) {
     this.points.push(point);
   }

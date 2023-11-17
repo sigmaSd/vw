@@ -25,7 +25,9 @@ export class GraphEditor {
     this.mouse = new Point(evt.offsetX, evt.offsetY);
     this.hovered = getNearestPoint(this.mouse, this.graph.points, 10);
     if (this.dragging == true) {
-      this.selected = new Point(this.mouse.x, this.mouse.y);
+      if (!this.selected) return;
+      this.selected.x = this.mouse.x;
+      this.selected.y = this.mouse.y;
     }
   }
   #handleMouseDown(evt: MouseEvent) {
@@ -62,6 +64,9 @@ export class GraphEditor {
     if (this.selected == hovered) {
       this.selected = undefined;
     }
+  }
+  dispose() {
+    this.graph.dispose();
   }
 
   display() {

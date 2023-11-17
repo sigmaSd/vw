@@ -12,15 +12,13 @@ canvas.height = 500;
 
 const ctx = canvas.getContext("2d")!;
 
-const p1 = new Point(200, 200);
-const p2 = new Point(400, 400);
-const p3 = new Point(150, 340);
-
-const s1 = new Segment(p1, p2);
-const s2 = new Segment(p1, p3);
-
-const graph = new Graph([p1, p2, p3], [s1, s2]);
+const graphString = localStorage.getItem("graph");
+const graphInfo = graphString ? JSON.parse(graphString) : undefined;
+const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
 const graphEditor = new GraphEditor(canvas, graph);
+
+//@ts-ignore hack expose to other script tags
+window._app = { graph, graphEditor };
 
 animate();
 

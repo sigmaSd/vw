@@ -94,7 +94,9 @@ class GraphEditor {
         this.mouse = new Point(evt.offsetX, evt.offsetY);
         this.hovered = getNearestPoint(this.mouse, this.graph.points, 10);
         if (this.dragging == true) {
-            this.selected = new Point(this.mouse.x, this.mouse.y);
+            if (!this.selected) return;
+            this.selected.x = this.mouse.x;
+            this.selected.y = this.mouse.y;
         }
     }
     #handleMouseDown(evt) {
@@ -130,6 +132,9 @@ class GraphEditor {
             this.selected = undefined;
         }
     }
+    dispose() {
+        this.graph.dispose();
+    }
     display() {
         this.graph.draw(this.ctx);
         if (this.hovered) {
@@ -154,9 +159,18 @@ class GraphEditor {
 class Graph {
     points;
     segments;
-    constructor(points, segments){
+    constructor(points = [], segments = []){
         this.points = points;
         this.segments = segments;
+    }
+    static load(info) {
+        const points = info.points.map((i)=>new Point(i.x, i.y));
+        const segments = info.segments.map((i)=>new Segment(points.find((p)=>p.equals(i.p1)), points.find((p)=>p.equals(i.p2))));
+        return new Graph(points, segments);
+    }
+    dispose() {
+        this.points = [];
+        this.segments = [];
     }
     addPoint(point) {
         this.points.push(point);
@@ -206,20 +220,14 @@ const canvas = document.getElementById("myCanvas");
 canvas.width = 500;
 canvas.height = 500;
 const ctx = canvas.getContext("2d");
-const p1 = new Point(200, 200);
-const p2 = new Point(400, 400);
-const p3 = new Point(150, 340);
-const s1 = new Segment(p1, p2);
-const s2 = new Segment(p1, p3);
-const graph = new Graph([
-    p1,
-    p2,
-    p3
-], [
-    s1,
-    s2
-]);
+const graphString = localStorage.getItem("graph");
+const graphInfo = graphString ? JSON.parse(graphString) : undefined;
+const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
 const graphEditor = new GraphEditor(canvas, graph);
+window._app = {
+    graph,
+    graphEditor
+};
 animate();
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);

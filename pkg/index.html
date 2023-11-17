@@ -3,8 +3,24 @@
 <head>
   <link rel="stylesheet" href="styles.css"/>
 </head>
+<body>
 <h1>World Edit</h1>
-<canvas id="myCanvas"/>
-<script src="index.js" type="module" ></script>
+<canvas id="myCanvas"></canvas>
+<div>
+<button onclick="dispose()"=>🗑️</button>
+<button onclick="save()">💾</button>
+</div>
+<script src="index.js" type="module" > </script>
+<script>
+function dispose() {
+const {graphEditor,graph} = _app
+  graphEditor.dispose()
+}
+function save() {
+  const {graphEditor,graph} = _app
+  localStorage.setItem("graph",JSON.stringify(graph))
+}
+</script>
+</body>
 </html>
 
