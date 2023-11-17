@@ -1,7 +1,4 @@
-// deno-fmt-ignore-file
-// deno-lint-ignore-file
-// This code was bundled using `deno bundle` and it's not recommended to edit it manually
-
+// THIS FILE IS AUTO-GENERATED, DO NOT EDIT
 class Point {
     x;
     y;

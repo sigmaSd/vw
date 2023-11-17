@@ -1,5 +1,6 @@
-#!/usr/bin/env -S deno run --allow-read=. --allow-run=deno --allow-net=0.0.0.0:8000 main.ts
+#!/usr/bin/env -S deno run --allow-read --allow-env --allow-write --allow-net main.ts
 import { serveDir } from "https://deno.land/std@0.207.0/http/file_server.ts";
+import { bundle } from "https://deno.land/x/emit@0.31.4/mod.ts";
 
 function server() {
   Deno.serve({ port: 8000 }, (req) => {
@@ -14,16 +15,20 @@ async function watchAndBundle() {
     if (id) clearTimeout(id);
     id = setTimeout(async () => {
       if (ev.paths[0].endsWith(".ts")) {
-        await bundle();
+        await bundleIndex();
       }
     }, DEBOUNCE);
   }
 
-  async function bundle() {
-    await new Deno.Command("deno", {
-      args: ["bundle", "--no-check", "pkg/index.ts", "pkg/index.js"],
-    })
-      .spawn().status;
+  async function bundleIndex() {
+    const { code } = await bundle(
+      new URL("file:///" + Deno.cwd() + "/pkg/index.ts"),
+    );
+
+    Deno.writeTextFileSync(
+      "pkg/index.js",
+      "// THIS FILE IS AUTO-GENERATED, DO NOT EDIT\n" + code,
+    );
   }
 }
 
