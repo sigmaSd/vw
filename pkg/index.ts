@@ -1,8 +1,6 @@
 ///<reference lib="dom"/>
 
 import { GraphEditor } from "./js/graphEditor.ts";
-import { Point } from "./js/math/point.ts";
-import { Segment } from "./js/math/segment.ts";
 import { Graph } from "./js/primitives/graph.ts";
 
 const canvas = document.getElementById("myCanvas") as HTMLCanvasElement;
