@@ -2,7 +2,7 @@
 import { serveDir } from "https://deno.land/std@0.207.0/http/file_server.ts";
 import { bundle } from "https://deno.land/x/emit@0.31.4/mod.ts";
 
-function server({ port }: { port: number }) {
+function startServer({ port }: { port: number }) {
   Deno.serve({ port }, (req) => {
     return serveDir(req, { fsRoot: "./pkg" });
   });
@@ -80,7 +80,7 @@ class Reloader {
 }
 
 if (import.meta.main) {
-  server({ port: 8000 });
+  startServer({ port: 8000 });
   const reloader = new Reloader({ port: 8001 });
   const watcher = Watcher.start();
   watcher.register([".js", ".html"], () => reloader.reload());
