@@ -1,5 +1,3 @@
-///<reference lib="dom"/>
-
 import { GraphEditor } from "./js/graphEditor.ts";
 import { Graph } from "./js/primitives/graph.ts";
 
