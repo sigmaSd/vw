@@ -224,10 +224,6 @@ const graphString = localStorage.getItem("graph");
 const graphInfo = graphString ? JSON.parse(graphString) : undefined;
 const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
 const graphEditor = new GraphEditor(canvas, graph);
-window._app = {
-    graph,
-    graphEditor
-};
 animate();
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);

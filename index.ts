@@ -13,9 +13,6 @@ const graphInfo = graphString ? JSON.parse(graphString) : undefined;
 const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
 const graphEditor = new GraphEditor(canvas, graph);
 
-//@ts-ignore hack expose to other script tags
-window._app = { graph, graphEditor };
-
 animate();
 
 function animate() {

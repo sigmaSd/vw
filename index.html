@@ -11,14 +11,12 @@
 <button onclick="save()">💾</button>
 </div>
 <script defer src="ws.js" > </script>
-<script src="index.js" type="module" > </script>
+<script src="index.js"> </script>
 <script>
 function dispose() {
-const {graphEditor,graph} = _app
   graphEditor.dispose()
 }
 function save() {
-  const {graphEditor,graph} = _app
   localStorage.setItem("graph",JSON.stringify(graph))
 }
 </script>
