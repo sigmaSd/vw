@@ -6,5 +6,8 @@
       "dom.iterable",
       "dom.asynciterable"
     ]
-  }
+  },
+  "exclude": [
+    "pkg/index.js"
+  ]
 }
