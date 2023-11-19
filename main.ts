@@ -10,7 +10,7 @@ function startServer({ port }: { port: number }) {
 
 class Watcher {
   #clients: {
-    pathEndSearch: string[];
+    regex: RegExp;
     callback: () => void | Promise<void>;
   }[] = [];
   constructor() {}
@@ -31,13 +31,13 @@ class Watcher {
   }
   async #notify(path: string) {
     for (const client of this.#clients) {
-      if (client.pathEndSearch.some((p) => path.endsWith(p))) {
+      if (path.match(client.regex)) {
         await client.callback();
       }
     }
   }
-  register(pathEndSearch: string[], callback: () => void) {
-    this.#clients.push({ pathEndSearch, callback });
+  register(regex: RegExp, callback: () => void) {
+    this.#clients.push({ regex, callback });
   }
 }
 
@@ -83,6 +83,6 @@ if (import.meta.main) {
   startServer({ port: 8000 });
   const reloader = new Reloader({ port: 8001 });
   const watcher = Watcher.start();
-  watcher.register([".js", ".html", ".css"], () => reloader.reload());
-  watcher.register([".ts"], bundler);
+  watcher.register(/\.js$|\.html$|\.css$/, () => reloader.reload());
+  watcher.register(/\.ts$/, bundler);
 }
