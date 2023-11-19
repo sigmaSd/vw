@@ -83,6 +83,6 @@ if (import.meta.main) {
   startServer({ port: 8000 });
   const reloader = new Reloader({ port: 8001 });
   const watcher = Watcher.start();
-  watcher.register([".js", ".html"], () => reloader.reload());
+  watcher.register([".js", ".html", ".css"], () => reloader.reload());
   watcher.register([".ts"], bundler);
 }
