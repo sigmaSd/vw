@@ -8,6 +8,6 @@
     ]
   },
   "exclude": [
-    "pkg/index.js"
+    "index.js"
   ]
 }
