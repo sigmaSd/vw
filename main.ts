@@ -2,7 +2,7 @@
 import { serveDir } from "https://deno.land/std@0.207.0/http/file_server.ts";
 import { bundle } from "https://deno.land/x/emit@0.31.4/mod.ts";
 
-function server(port: number) {
+function server({ port }: { port: number }) {
   Deno.serve({ port }, (req) => {
     return serveDir(req, { fsRoot: "./pkg" });
   });
@@ -55,7 +55,7 @@ async function bundler() {
 class Reloader {
   #sockets: Map<number, WebSocket> = new Map();
   #id = 0;
-  constructor(port: number) {
+  constructor({ port }: { port: number }) {
     Deno.serve({ port }, (req) => {
       if (req.headers.get("upgrade") != "websocket") {
         return new Response(null, { status: 501 });
@@ -80,8 +80,8 @@ class Reloader {
 }
 
 if (import.meta.main) {
-  server(8000);
-  const reloader = new Reloader(8001);
+  server({ port: 8000 });
+  const reloader = new Reloader({ port: 8001 });
   const watcher = Watcher.start();
   watcher.register([".js", ".html"], () => reloader.reload());
   watcher.register([".ts"], bundler);
