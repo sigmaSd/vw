@@ -2,37 +2,87 @@
 import { serveDir } from "https://deno.land/std@0.207.0/http/file_server.ts";
 import { bundle } from "https://deno.land/x/emit@0.31.4/mod.ts";
 
-function server() {
-  Deno.serve({ port: 8000 }, (req) => {
+function server(port: number) {
+  Deno.serve({ port }, (req) => {
     return serveDir(req, { fsRoot: "./pkg" });
   });
 }
 
-async function watchAndBundle() {
-  const DEBOUNCE = 200 /*ms*/;
-  let id;
-  for await (const ev of Deno.watchFs(".")) {
-    if (id) clearTimeout(id);
-    id = setTimeout(async () => {
-      if (ev.paths[0].endsWith(".ts")) {
-        await bundleIndex();
+class Watcher {
+  #clients: {
+    pathEndSearch: string[];
+    callback: () => void | Promise<void>;
+  }[] = [];
+  constructor() {}
+  static start() {
+    const self = new Watcher();
+    (async () => {
+      const DEBOUNCE = 200 /*ms*/;
+      let id;
+      for await (const ev of Deno.watchFs(".")) {
+        if (id) clearTimeout(id);
+        id = setTimeout(async () => {
+          const path = ev.paths[0];
+          await self.#notify(path);
+        }, DEBOUNCE);
       }
-    }, DEBOUNCE);
+    })();
+    return self;
   }
+  async #notify(path: string) {
+    for (const client of this.#clients) {
+      if (client.pathEndSearch.some((p) => path.endsWith(p))) {
+        await client.callback();
+      }
+    }
+  }
+  register(pathEndSearch: string[], callback: () => void) {
+    this.#clients.push({ pathEndSearch, callback });
+  }
+}
 
-  async function bundleIndex() {
-    const { code } = await bundle(
-      new URL("file:///" + Deno.cwd() + "/pkg/index.ts"),
-    );
+async function bundler() {
+  const { code } = await bundle(
+    new URL("file:///" + Deno.cwd() + "/pkg/index.ts"),
+  );
 
-    Deno.writeTextFileSync(
-      "pkg/index.js",
-      "// THIS FILE IS AUTO-GENERATED, DO NOT EDIT\n" + code,
-    );
+  Deno.writeTextFileSync(
+    "pkg/index.js",
+    "// THIS FILE IS AUTO-GENERATED, DO NOT EDIT\n" + code,
+  );
+}
+
+class Reloader {
+  #sockets: Map<number, WebSocket> = new Map();
+  #id = 0;
+  constructor(port: number) {
+    Deno.serve({ port }, (req) => {
+      if (req.headers.get("upgrade") != "websocket") {
+        return new Response(null, { status: 501 });
+      }
+
+      const { socket, response } = Deno.upgradeWebSocket(req);
+
+      socket.onopen = () => {
+        this.#sockets.set(this.#id, socket);
+      };
+      socket.onclose = () => {
+        this.#sockets.delete(this.#id);
+      };
+
+      this.#id++;
+      return response;
+    });
+  }
+  reload() {
+    this.#sockets.forEach((socket) => socket.send("reload"));
   }
 }
 
 if (import.meta.main) {
-  server();
-  watchAndBundle();
+  server(8000);
+  const reloader = new Reloader(8001);
+  const watcher = Watcher.start();
+  watcher.register([".js", ".html"], () => reloader.reload());
+  watcher.register([".ts"], bundler);
 }
