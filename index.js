@@ -230,3 +230,9 @@ function animate() {
     graphEditor.display();
     requestAnimationFrame(animate);
 }
+function dispose() {
+    graphEditor.dispose();
+}
+function save() {
+    localStorage.setItem("graph", JSON.stringify(graph));
+}

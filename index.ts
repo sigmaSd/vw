@@ -20,3 +20,11 @@ function animate() {
   graphEditor.display();
   requestAnimationFrame(animate);
 }
+
+export function dispose() {
+  graphEditor.dispose();
+}
+
+export function save() {
+  localStorage.setItem("graph", JSON.stringify(graph));
+}
